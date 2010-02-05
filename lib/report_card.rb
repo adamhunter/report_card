@@ -1,6 +1,6 @@
 $:.unshift(File.dirname(__FILE__))
 
-require 'integrity'
+#require 'integrity'
 require 'metric_fu'
 require 'tinder'
 require 'erb'
@@ -12,16 +12,18 @@ module ReportCard
   CONFIG_FILE = File.expand_path(File.join(File.dirname(__FILE__), "..", "config.yml"))
 
   def self.grade
-    Integrity.new(config['integrity_config'])
+    require config['integrity_path'] + '/init.rb'
     self.setup
 
     ignore = config['ignore'] ? Regexp.new(config['ignore']) : /[^\w\d\s\S]+/
     projects = []
 
     Integrity::Project.all.each do |project|
+      puts project.name
       if project.name !~ ignore
         grader = Grader.new(project, config)
         grader.grade
+        puts grader.success?
         projects << project if grader.success?
       end
     end

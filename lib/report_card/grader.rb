@@ -20,7 +20,8 @@ module ReportCard
     end
 
     def ready?
-      dir = Integrity::ProjectBuilder.new(project).send(:export_directory)
+      #dir = Integrity::ProjectBuilder.new(project).send(:export_directory)
+      dir = ReportCard.config['integrity_path'] + '/' + Integrity::Repository.new(project.uri, project.branch, project.builds.last.commit.identifier).directory
       if File.exist?(dir)
         STDERR.puts ">> Building metrics for #{project.name}"
         Dir.chdir dir
@@ -36,7 +37,8 @@ module ReportCard
         config.data_directory = self.archive_path
         config.template_class = AwesomeTemplate
         config.metrics = config.graphs = [:flog, :flay, :rcov, :reek, :roodi]
-        config.rcov     = { :test_files => ['test/**/*_test.rb', 'spec/**/*_spec.rb'],
+        config.rcov     = { :environment => 'test',
+                            :test_files => ['test/**/*_test.rb', 'spec/**/*_spec.rb'],
                             :rcov_opts  => ["--sort coverage",
                             "--no-html",
                             "--text-coverage",
@@ -52,7 +54,7 @@ module ReportCard
     def generate
       begin
         MetricFu.metrics.each { |metric| MetricFu.report.add(metric) }
-        MetricFu.graphs.each  { |graph| MetricFu.graph.add(graph) }
+        MetricFu.graphs.each  { |graph| MetricFu.graph.add(graph, :bluff) }
 
         MetricFu.report.save_output(MetricFu.report.to_yaml, MetricFu.base_directory, 'report.yml')
         MetricFu.report.save_output(MetricFu.report.to_yaml, MetricFu.data_directory, "#{Time.now.strftime("%Y%m%d")}.yml")

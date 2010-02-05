@@ -5,4 +5,5 @@ rdoc
 pkg
 config.yml
 _site/
+public/
 integrity/
