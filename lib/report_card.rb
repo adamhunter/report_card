@@ -19,7 +19,6 @@ module ReportCard
     projects = []
 
     Integrity::Project.all.each do |project|
-      puts project.name
       if project.name !~ ignore
         grader = Grader.new(project, config)
         grader.grade
